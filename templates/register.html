@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth">
+  <h1>Register shop</h1>
+  <form method="post">
+    <label>Full name <input name="name" required /></label>
+    <label>Shop name <input name="shop" required /></label>
+    <label>Phone <input name="phone" required /></label>
+    <label>PIN <input name="pin" type="password" maxlength="6" required /></label>
+    <button type="submit">Create account</button>
+  </form>
+  <p><a href="{{ url_for('login') }}">Back to login</a></p>
+</section>
+{% endblock %}

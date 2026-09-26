@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="score">
+  <div>
+    <p>Your DukaCredit score</p>
+    <h2>{{ score.score }}</h2>
+    <p>{{ score.label }} · {{ score.count }} credit entries</p>
+  </div>
+</section>
+<div class="cards">
+  <article><p>Owed to suppliers</p><h3>KES {{ "%.0f"|format(supplier) }}</h3></article>
+  <article><p>Customers owe you</p><h3>KES {{ "%.0f"|format(customer) }}</h3></article>
+  <article><p>Overdue items</p><h3>{{ overdue|length }}</h3></article>
+</div>
+<h3>Reminders</h3>
+<ul>
+  {% for t in overdue %}
+    <li>{{ t.party }} ({{ t.kind }}) — due {{ t.due_date }} — KES {{ "%.0f"|format(t.balance) }}</li>
+  {% else %}
+    <li>No overdue items</li>
+  {% endfor %}
+</ul>
+<h3>Recent activity</h3>
+<ul>
+  {% for t in recent %}
+    <li>{{ t.tx_date }} · {{ t.kind }} · {{ t.party }} · KES {{ "%.0f"|format(t.amount) }}</li>
+  {% else %}
+    <li>No transactions yet</li>
+  {% endfor %}
+</ul>
+{% endblock %}

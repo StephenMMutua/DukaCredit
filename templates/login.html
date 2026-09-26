@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth">
+  <h1>DukaCredit</h1>
+  <p>Digital ledger for dukas</p>
+  <form method="post">
+    <label>Phone <input name="phone" value="0712345678" required /></label>
+    <label>PIN <input name="pin" type="password" value="1234" required /></label>
+    <button type="submit">Login</button>
+  </form>
+  <p><a href="{{ url_for('register') }}">Create account</a></p>
+  <p class="hint">Demo: 0712345678 / 1234</p>
+</section>
+{% endblock %}

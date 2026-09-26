@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="report">
+  <h1>Merchant credit report</h1>
+  <p>{{ user.shop }} · {{ user.name }} · {{ user.phone }} · Generated {{ today }}</p>
+  <p><strong>Score:</strong> {{ score.score }}/100 ({{ score.label }})</p>
+  <p><strong>Credit entries:</strong> {{ score.count }} · Settled: {{ score.settled }} · Overdue: {{ score.overdue }}</p>
+  <p><strong>Supplier outstanding:</strong> KES {{ "%.0f"|format(supplier) }}</p>
+  <p><strong>Customer outstanding:</strong> KES {{ "%.0f"|format(customer) }}</p>
+  <p>Indicators: repayment completion, activity volume, overdue count. Demonstration score only — not a CRB score.</p>
+  <p>Share this report only with the merchant’s consent (Kenya Data Protection Act, 2019).</p>
+  <button onclick="window.print()">Print / Save as PDF</button>
+</section>
+{% endblock %}

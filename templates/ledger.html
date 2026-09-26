@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="filters" method="get">
+  <select name="kind">
+    <option value="all" {% if kind=='all' %}selected{% endif %}>All</option>
+    <option value="supplier" {% if kind=='supplier' %}selected{% endif %}>Supplier</option>
+    <option value="customer" {% if kind=='customer' %}selected{% endif %}>Customer</option>
+    <option value="repayment" {% if kind=='repayment' %}selected{% endif %}>Repayment</option>
+  </select>
+  <input name="q" value="{{ q }}" placeholder="Search name" />
+  <button type="submit">Filter</button>
+</form>
+<table>
+  <thead>
+    <tr><th>Date</th><th>Type</th><th>Party</th><th>Amount</th><th>Balance</th><th>Due</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    {% for t in rows %}
+    <tr>
+      <td>{{ t.tx_date }}</td>
+      <td>{{ t.kind }}</td>
+      <td>{{ t.party }}</td>
+      <td>{{ "%.0f"|format(t.amount) }}</td>
+      <td>{{ "%.0f"|format(t.balance) }}</td>
+      <td>{{ t.due_date or '-' }}</td>
+      <td>{{ t.status }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7">No records</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
