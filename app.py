@@ -143,6 +143,49 @@ def totals(user_id):
     return supplier, customer, overdue_rows, recent
 
 
+def apply_payment(user_id, target_id, amount):
+    conn = db()
+    target = conn.execute(
+        "SELECT * FROM transactions WHERE id=? AND user_id=?",
+        (target_id, user_id),
+    ).fetchone()
+    if not target or target["kind"] == "repayment":
+        conn.close()
+        return "Select a valid debt."
+    if amount <= 0:
+        conn.close()
+        return "Enter an amount greater than 0."
+    if amount > target["balance"]:
+        conn.close()
+        return "Amount is more than the outstanding balance."
+    new_bal = target["balance"] - amount
+    status = "settled" if new_bal <= 0 else "partial"
+    conn.execute(
+        "UPDATE transactions SET balance=?, status=? WHERE id=?",
+        (new_bal, status, target_id),
+    )
+    conn.execute(
+        """INSERT INTO transactions
+           (user_id, kind, party, amount, balance, tx_date, due_date, note, status, target_id)
+           VALUES (?,?,?,?,?,?,?,?,?,?)""",
+        (
+            user_id,
+            "repayment",
+            target["party"],
+            amount,
+            0,
+            date.today().isoformat(),
+            target["due_date"],
+            "Repayment",
+            "settled",
+            target_id,
+        ),
+    )
+    conn.commit()
+    conn.close()
+    return None
+
+
 @app.route("/")
 def home():
     if "user_id" in session:
@@ -234,7 +277,52 @@ def ledger():
     conn = db()
     rows = conn.execute(sql, params).fetchall()
     conn.close()
-    return render_template("ledger.html", user=user, rows=rows, kind=kind, q=q)
+    return render_template(
+        "ledger.html",
+        user=user,
+        rows=rows,
+        kind=kind,
+        q=q,
+        today=date.today().isoformat(),
+    )
+
+
+@app.route("/ledger/pay", methods=["POST"])
+@login_required
+def ledger_pay():
+    user = current_user()
+    try:
+        target_id = int(request.form["target_id"])
+        amount = float(request.form["amount"])
+    except (KeyError, ValueError):
+        flash("Enter a valid amount.")
+        return redirect(url_for("ledger"))
+    error = apply_payment(user["id"], target_id, amount)
+    flash(error or "Payment saved.")
+    return redirect(url_for("ledger"))
+
+
+@app.route("/ledger/settle", methods=["POST"])
+@login_required
+def ledger_settle():
+    user = current_user()
+    try:
+        target_id = int(request.form["target_id"])
+    except (KeyError, ValueError):
+        flash("Select a valid debt.")
+        return redirect(url_for("ledger"))
+    conn = db()
+    target = conn.execute(
+        "SELECT * FROM transactions WHERE id=? AND user_id=?",
+        (target_id, user["id"]),
+    ).fetchone()
+    conn.close()
+    if not target:
+        flash("Select a valid debt.")
+        return redirect(url_for("ledger"))
+    error = apply_payment(user["id"], target_id, target["balance"])
+    flash(error or "Settled in full.")
+    return redirect(url_for("ledger"))
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -273,40 +361,8 @@ def add():
         elif form_kind == "repayment":
             target_id = int(request.form["target_id"])
             amount = float(request.form["amount"])
-            target = conn.execute(
-                "SELECT * FROM transactions WHERE id=? AND user_id=?",
-                (target_id, user["id"]),
-            ).fetchone()
-            if not target:
-                flash("Select a valid debt.")
-            elif amount > target["balance"]:
-                flash("Amount is more than the outstanding balance.")
-            else:
-                new_bal = target["balance"] - amount
-                status = "settled" if new_bal <= 0 else "partial"
-                conn.execute(
-                    "UPDATE transactions SET balance=?, status=? WHERE id=?",
-                    (new_bal, status, target_id),
-                )
-                conn.execute(
-                    """INSERT INTO transactions
-                       (user_id, kind, party, amount, balance, tx_date, due_date, note, status, target_id)
-                       VALUES (?,?,?,?,?,?,?,?,?,?)""",
-                    (
-                        user["id"],
-                        "repayment",
-                        target["party"],
-                        amount,
-                        0,
-                        request.form["tx_date"],
-                        target["due_date"],
-                        "Repayment",
-                        "settled",
-                        target_id,
-                    ),
-                )
-                conn.commit()
-                flash("Repayment recorded.")
+            error = apply_payment(user["id"], target_id, amount)
+            flash(error or "Repayment recorded.")
         conn.close()
         return redirect(url_for("add"))
     conn.close()
