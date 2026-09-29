@@ -1,39 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Supplier purchase</h2>
-<form method="post">
+<form method="post" style="max-width:420px">
   <input type="hidden" name="form_kind" value="supplier" />
-  <label>Supplier <input name="party" required /></label>
-  <label>Amount <input name="amount" type="number" min="1" required /></label>
-  <label>Date <input name="tx_date" type="date" value="{{ today }}" required /></label>
-  <label>Due date <input name="due_date" type="date" required /></label>
-  <label>Note <input name="note" /></label>
+  <label>Supplier <input name="party" required style="max-width:420px" /></label>
+  <label>Amount <input name="amount" type="number" min="1" required style="max-width:220px" /></label>
+  <label>Date <input name="tx_date" type="date" value="{{ today }}" required style="max-width:220px" /></label>
+  <label>Due date <input name="due_date" type="date" required style="max-width:220px" /></label>
+  <label>Note <input name="note" style="max-width:420px" /></label>
   <button type="submit">Save supplier debt</button>
 </form>
 
 <h2>Customer sale (deni)</h2>
-<form method="post">
+<form method="post" style="max-width:420px">
   <input type="hidden" name="form_kind" value="customer" />
-  <label>Customer <input name="party" required /></label>
-  <label>Amount <input name="amount" type="number" min="1" required /></label>
-  <label>Date <input name="tx_date" type="date" value="{{ today }}" required /></label>
-  <label>Expected repayment <input name="due_date" type="date" required /></label>
-  <label>Note <input name="note" /></label>
+  <label>Customer <input name="party" required style="max-width:420px" /></label>
+  <label>Amount <input name="amount" type="number" min="1" required style="max-width:220px" /></label>
+  <label>Date <input name="tx_date" type="date" value="{{ today }}" required style="max-width:220px" /></label>
+  <label>Expected repayment <input name="due_date" type="date" required style="max-width:220px" /></label>
+  <label>Note <input name="note" style="max-width:420px" /></label>
   <button type="submit">Save customer credit</button>
 </form>
 
 <h2>Repayment</h2>
-<form method="post">
+<form method="post" style="max-width:420px">
   <input type="hidden" name="form_kind" value="repayment" />
   <label>Against
-    <select name="target_id" required>
+    <select name="target_id" required style="max-width:420px">
       {% for t in open_rows %}
         <option value="{{ t.id }}">{{ t.kind }} · {{ t.party }} · bal {{ "%.0f"|format(t.balance) }}</option>
       {% endfor %}
     </select>
   </label>
-  <label>Amount <input name="amount" type="number" min="1" required /></label>
-  <label>Date <input name="tx_date" type="date" value="{{ today }}" required /></label>
+  <label>Amount <input name="amount" type="number" min="1" required style="max-width:220px" /></label>
+  <label>Date <input name="tx_date" type="date" value="{{ today }}" required style="max-width:220px" /></label>
   <button type="submit">Record repayment</button>
 </form>
 {% endblock %}
